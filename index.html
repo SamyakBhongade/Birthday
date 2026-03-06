@@ -357,40 +357,19 @@
         // Set initial volume
         audio.volume = volumeControl.value;
 
-        // Helper: start audio and update button
-        function startAudio() {
-            audio.play()
-                .then(() => {
-                    isPlaying = true;
-                    playPauseBtn.innerHTML = '<i class="play-icon">⏸️</i>';
-                })
-                .catch(err => {
-                    console.log("Autoplay blocked:", err);
-                });
-        }
-
-        // Muted autoplay (browsers allow muted autoplay universally)
-        // Then immediately unmute so music is audible from the start
-        window.addEventListener('load', () => {
-            audio.muted = false;
-            audio.play()
-                .then(() => {
-                    isPlaying = true;
-                    playPauseBtn.innerHTML = '<i class="play-icon">⏸️</i>';
-                })
-                .catch(() => {
-                    // If still blocked, unmute on first interaction
-                    audio.muted = true;
-                });
+        // Audio is muted+autoplay from page load (browser allows this)
+        // Show pause icon immediately since it's already playing (just muted)
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            playPauseBtn.innerHTML = '<i class="play-icon">⏸️</i>';
         });
 
-        // Fallback: if autoplay was blocked, start on first user interaction
+        // On first user interaction, unmute — music becomes audible instantly
         function onFirstInteraction() {
-            if (!isPlaying && !userStarted) {
-                userStarted = true;
-                audio.muted = false;
-                startAudio();
-            }
+            audio.muted = false;
+            audio.volume = volumeControl.value;
+            isPlaying = true;
+            playPauseBtn.innerHTML = '<i class="play-icon">⏸️</i>';
             document.removeEventListener('click', onFirstInteraction);
             document.removeEventListener('touchstart', onFirstInteraction);
             document.removeEventListener('keydown', onFirstInteraction);
