@@ -340,7 +340,7 @@
         <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
     </div>
 
-    <audio id="birthday-song" loop="">
+    <audio id="birthday-song" loop autoplay muted>
         <source src="Butterfly effect bgm.m4a" type="audio/mp4">
         Your browser does not support the audio element.
     </audio>
@@ -369,18 +369,28 @@
                 });
         }
 
-        // Try autoplay immediately on load
+        // Muted autoplay (browsers allow muted autoplay universally)
+        // Then immediately unmute so music is audible from the start
         window.addEventListener('load', () => {
-            startAudio();
+            audio.muted = false;
+            audio.play()
+                .then(() => {
+                    isPlaying = true;
+                    playPauseBtn.innerHTML = '<i class="play-icon">⏸️</i>';
+                })
+                .catch(() => {
+                    // If still blocked, unmute on first interaction
+                    audio.muted = true;
+                });
         });
 
         // Fallback: if autoplay was blocked, start on first user interaction
         function onFirstInteraction() {
             if (!isPlaying && !userStarted) {
                 userStarted = true;
+                audio.muted = false;
                 startAudio();
             }
-            // Remove listeners after first interaction
             document.removeEventListener('click', onFirstInteraction);
             document.removeEventListener('touchstart', onFirstInteraction);
             document.removeEventListener('keydown', onFirstInteraction);
